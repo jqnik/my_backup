@@ -49,7 +49,7 @@ from argparse import RawDescriptionHelpFormatter
 #	is drive there?
 #	do all directories (src/dest) exist	?
 #	if any errors exit and advance due time just 2 days (or configurable)
-#	
+#
 # if no, see if we are 3 days close to it
 # if 3 days close to it, give heads up via mail
 # if not 3 days close to it, just echo that no backup is needed until...
@@ -90,7 +90,7 @@ class MyError(Exception):
 		os.unlink(pidfile)
 
 	def __str__(self):
-		return repr(self.value)	
+		return repr(self.value)
 
 
 def check_srcs_present(srcpaths):
@@ -102,13 +102,13 @@ def check_srcs_present(srcpaths):
 		print("Here is a source path:" + str(path))
 		if os.path.isdir(path):
 			print("%s is a directoy" % path)
-		else:  
+		else:
 			print("%s is not a directoy" % path)
 			if os.path.isfile(path):
 				print("but it is a file")
 	return srcpaths
 
-	 
+
 def get_dev_for_uuid(uuid):
 	uuids = []
 	proc = subprocess.Popen(["ls", "-1", "/dev/disk/by-uuid"], stdout=subprocess.PIPE)
@@ -120,9 +120,9 @@ def get_dev_for_uuid(uuid):
 			break
 	print("these are the UUIDs:" + str(uuids))
 	print("this is the UUID we are looking for:" + str(uuid))
-	
+
 	if uuid[0] in uuids:
-		#TODO: more error checking 
+		#TODO: more error checking
 		proc = subprocess.Popen(["blkid", "-U", str(uuid[0])], stdout=subprocess.PIPE)
 		#TODO: more error checking
 		dev = proc.stdout.readline()
@@ -131,7 +131,7 @@ def get_dev_for_uuid(uuid):
 		print("UUID %s could not be found" % uuid)
 		return None
 	return 	dev
-	
+
 
 # fiddling with mount points in python is quite tedious, hence we use three helper shell scripts
 
@@ -148,12 +148,12 @@ def check_dev_mounted(dev):
 def umount_dev(dev):
 	proc = subprocess.Popen([UMOUNT_DEV, dev], stdout=subprocess.PIPE)
 	proc.wait()
-	return proc.returncode 
+	return proc.returncode
 
 def mount_dev(dev, trgt):
 	proc = subprocess.Popen([MOUNT_DEV, dev, trgt], stdout=subprocess.PIPE)
 	proc.wait()
-	return proc.returncode 
+	return proc.returncode
 
 def check_trgt_present(trgt):
 	#TODO: assuming we get a UUID, but ultimately parse or customize
@@ -165,7 +165,7 @@ def check_trgt_present(trgt):
 
 def main(argv=None): # IGNORE:C0111
     '''Command line options.'''
-    
+
     if argv is None:
         argv = sys.argv
     else:
@@ -195,7 +195,7 @@ def main(argv=None): # IGNORE:C0111
 
         # Process arguments
         args = parser.parse_args()
-        
+
         verbose = args.verbose
         print("verbose = " + str(verbose))
         config_file = args.config_file
@@ -234,7 +234,7 @@ def main(argv=None): # IGNORE:C0111
 		print("Backup is not due (Last Backup was on %s, today is %s, inteval is %s days)"
 			% (str(last_backup), str(today), backup_interval_days))
 		# missing: quit
-	else: 
+	else:
 		print("Backup is due (Last Backup was on %s, today is %s, inteval is %s days)"
 			% (str(last_backup), str(today), backup_interval_days))
 
@@ -307,27 +307,27 @@ def main(argv=None): # IGNORE:C0111
 		# next_date_to_act = config.set('General', 'next_action', _today+2days_)
 		sys.exit(1)
 
-	# we made it to this point, disk is properly mounted, now check target path exists	
+	# we made it to this point, disk is properly mounted, now check target path exists
 	dst = ''.join((dst_mount + dst_path))
 	if not os.path.exists(dst):
 		printf("Target path %s on device %s cannot be found" % (dst, dev))
 		# next_date_to_act = config.set('General', 'next_action', _today+2days_)
 		sys.exit(2)
-	
+
 	# we made it here:
 	# src paths all exist, device mounted, target path exists
-	  
-	
-	
+
+
+
 
 	# Checks (disk present, directories present, srcpaths present, etc.)
 	# if error:
-	# change / add 
-	# 
+	# change / add
+	#
 	# next_date_to_act = config.set('General', 'next_action', _today+2days_)
 	#
 	# if success:
-	# change / add	
+	# change / add
 	# config.set('General', 'last_backup', _today_)
 
 
