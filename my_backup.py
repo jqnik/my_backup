@@ -1,27 +1,17 @@
-# housekeeping:
-# a) email subjects and msg bodies (msg body should also always go to syslog)
+# Missing: explanatory messages for error scenarios:
 # -> cannot run backup (drive not mounted, other)
 # -> cannot run and we are really late (overdue)
 # -> mount failed
 # -> rsync failed
 # -> rsync success
 
-# FUNCTIONS
+# Missing FUNCTIONS
 # email
 # syslog / wall
 # error (using email and syslog)
 # warning (dto.)
 # info (dto.)
 # rsync
-# mount
-# unmount
-
-# parse arguments
-# a) where is the config file
-# b) where is the last_backup_file
-# c) verbose
-# d) dry_run
-# e) rsync logdir
 
 import sys
 import os
@@ -34,13 +24,6 @@ from argparse import RawDescriptionHelpFormatter
 
 # create pid_file
 
-# read the config file
-# a) read the intervall in which backups should be run
-# b) read the directories that should be backed up
-# c) read the rsync options
-# d) read hard disk uuid
-
-# read the last backup from file
 
 # Compare if last backup is past longer than intervall
 # if yes try to backup, but run checks first
