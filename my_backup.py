@@ -62,7 +62,7 @@ PROFILE = 0
 
 __version__ = 0.1
 __date__ = '2013-02-18'
-__updated__ = '2013-02-18'
+__updated__ = '2014-08-22'
 
 class MyError(Exception):
 	def __init__(self, value):
