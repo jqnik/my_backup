@@ -16,6 +16,8 @@
 import sys
 import os
 import ConfigParser
+import logging
+import logging.handlers
 import datetime
 import subprocess
 
@@ -59,6 +61,7 @@ retry_days = None
 backup_interval_days = None
 cfg_file_obj = None
 verbose = None
+logger = None
 
 DEBUG = 0
 TESTRUN = 0
@@ -195,7 +198,7 @@ def main(argv=None): # IGNORE:C0111
     try:
         # Setup argument parser
         parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter)
-        parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
+        parser.add_argument("-v", "--verbosity", dest="verbosity", action="count", help="set verbosity level (debug|info|warning|error), default: warning")
         parser.add_argument("-c", "--cfg_file", dest="cfg_file", help="path to config file (default: my_backup.conf")
         parser.add_argument("-u", "--dst_uuid", dest="dst_uuid", help="UUID of the backup disk")
         parser.add_argument("-d", "--dst_path", dest="dst_path", help="Additional path on backup disk")
@@ -210,7 +213,15 @@ def main(argv=None): # IGNORE:C0111
         # Process arguments
         args = parser.parse_args()
 
-        verbose = args.verbose
+        log_file = None
+        email_mailhost = None
+        email_fromaddr = None
+        email_toaddrs = None
+        email_subject = None
+        email_user = None
+        email_pass = None
+        email_secure = None
+        verbosity = args.verbosity
         cfg_file = args.cfg_file
         srcpaths = args.srcpaths
         dst_uuid = args.dst_uuid
@@ -238,6 +249,84 @@ def main(argv=None): # IGNORE:C0111
             config = None
 
         #------------------------ config parsing ----------------------------#
+
+        #-------------------- set up the logger ---------------#
+
+
+        #TODO: Add log_file to command line parms
+        if not log_file and config:
+            log_file = config.get('General', 'log_file').split()
+            print("log_file = %s" % str(log_file))
+
+        LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL}
+
+        if not verbosity and config:
+            verbosity = config.get('General', 'verbosity')
+            print("verbosity = %s" % verbosity)
+        log_level = LEVELS.get(verbosity, logging.WARNING)
+        print("log_level = %s" % str(log_level))
+
+        if not email_mailhost and config:
+            email_mailhost = str(config.get('General', 'email_mailhost'))
+        if not email_fromaddr and config:
+            email_fromaddr = str(config.get('General', 'email_fromaddr'))
+        if not email_toaddrs and config:
+            email_toaddrs = str(config.get('General', 'email_toaddrs'))
+        if not email_subject and config:
+            email_subject = str(config.get('General', 'email_subject'))
+        if not email_user and config:
+            email_user = str(config.get('General', 'email_user'))
+        if not email_pass and config:
+            email_pass = str(config.get('General', 'email_pass'))
+        if not email_secure and config:
+            email_secure = str(config.get('General', 'email_secure'))
+
+        print("email_mailhost %s" % str(email_mailhost))
+        print("email_fromaddr %s" % email_fromaddr)
+        print("email_toaddrs %s" % email_toaddrs)
+        print("email_subject %s" % email_subject)
+        print("email_user %s" % email_user)
+        print("email_pass %s" % email_pass)
+        print("email_secure %s" % email_secure)
+
+        logging.basicConfig(level=log_level,
+                            format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                            datefmt='%m-%d %H:%M')
+
+        cons_handler = logging.StreamHandler()
+        cons_handler.setLevel(logging.INFO)
+        logging.getLogger('').addHandler(cons_handler)
+
+        if log_file:
+            file_handler = logging.FileHandler(log_file, mode='a')
+            file_handler.setLevel(logging.DEBUG)
+            logging.getLogger('').addHandler(file_handler)
+
+        syslog_handler = logging.handlers.SysLogHandler(address='/dev/log')
+        syslog_handler.setLevel(logging.WARNING)
+        logging.getLogger('').addHandler(syslog_handler)
+
+        empty_tuple = ()
+
+        if email_mailhost and email_fromaddr and email_toaddrs and email_subject:
+            mail_handler = logging.handlers.SMTPHandler(email_mailhost,
+                    email_fromaddr, email_toaddrs, email_subject,
+                    credentials=(email_user,email_pass), secure=())
+            mail_handler.setLevel(logging.WARNING)
+            logging.getLogger('').addHandler(mail_handler)
+
+
+        logging.info('This message should go to the logfile only')
+        logging.info('This message should go to the console and the logfile')
+        logging.warn('This message should go to the console, logfile, syslog and mail')
+        logging.error('This message should go to the console, logfile, syslog and mail')
+
+        #-------------------- End of set up the logger ---------------#
+
 	next_action_string = config.get('Autogenerated', 'next_action')
 	backup_interval_days = int(config.get('General', 'backup_interval_days'))
         retry_days = int(config.get('General', 'retry_days'))
