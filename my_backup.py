@@ -6,11 +6,6 @@
 # -> rsync success
 
 # Missing FUNCTIONS
-# email
-# syslog / wall
-# error (using email and syslog)
-# warning (dto.)
-# info (dto.)
 # rsync
 
 import sys
@@ -47,6 +42,7 @@ DEFAULT_CFG_FILE = "~/.my_backup.cfg"
 CHECK_DEV_MOUNTED = "./check_dev_mounted.sh"
 UMOUNT_DEV = "./umount_dev.sh"
 MOUNT_DEV = "./mount_dev.sh"
+RUN_RSYNC = "./run_rsync.sh"
 
 cfg_file = None
 srcpaths = None
@@ -382,42 +378,36 @@ def main(argv=None): # IGNORE:C0111
 
         try:
             dev = get_dev_for_uuid(dst_uuid)
-        except BackupNotPossibleError as e:
-            exit_backup_not_possible(e.message)
-
-        loggin.info("Found %s for UUID %s" % (dev, dst_uuid))
+        except Exception as e:
+            exit_warning(e.message)
 
         try:
             mounted = check_dev_mounted(dev)
-        except BackupNotPossibleError as e:
-            exit_backup_not_possible(e.message)
+        except Exception as e:
+            exit_warning(e.message)
 
         if mounted:
                 logging.debug("%s is mounted, umounting it" % (dst_uuid))
                 try:
                     umount_dev(dev)
-                except BackupNotPossibleError:
-                    exit_backup_not_possible("Error unmounting %s (%s)" % (dst_uuid, e.message))
-                else:
-                        logging.debug("Mounting %s again to %s" % (dst_uuid, dst_path))
-        else:
-                logging.info("%s is not mounted, mounting it to %s" % (dst_uuid, dst_mount))
-                try:
-                    mount_dev(dev, ''.join(dst_mount))
-                except BackupNotPossibleError as e:
-                    exit_backup_not_possible("Error mounting %s (%s)" % (dst_uuid, e.message))
+                except Exception as e:
+                    exit_warning("Error unmounting %s (%s)" % (str(dst_uuid), str(e.message)))
 
-	# we made it to this point, disk is properly mounted, now check target path exists
+        logging.info("Mounting %s to %s" % (dst_uuid, dst_mount))
+        try:
+            mount_dev(dev, ''.join(dst_mount))
+        except Exception as e:
+            exit_warning("Error mounting %s (%s)" % (dst_uuid, e.message))
+
+	# We made it to this point, disk is properly mounted, now check target path exists
 	dst = ''.join((dst_mount + dst_path))
 	if not os.path.exists(dst):
-                exit_backup_not_possible("Target path %s on device %s cannot be found" % (dst, dev))
+                exit_warning("Target path %s on device %s cannot be found" % (dst, dev))
 
 	# we made it here:
 	# src paths all exist, device mounted, target path exists
         print("_________Ready to execute rsync______")
-
-
-
+	#proc = subprocess.Popen([RUN_RSYNC, src, dst], stdout=subprocess.PIPE)
 
 	# if success:
         # run_backup
