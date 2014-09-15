@@ -1,1 +1,4 @@
-rsync --stats --log-file $LOGFILE --del -rt $SOURCE1 $SOURCE2 $DEST > $STATSFILE
+#!/bin/sh
+echo "commandline: rsync $1"
+rsync $1
+exit $? 
