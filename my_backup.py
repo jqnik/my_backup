@@ -72,10 +72,13 @@ class MyConfig:
 
 def cleanup(myConfig):
 
-    try:
-        mounted = check_dev_mounted(myConfig.dev)
-    except Exception as e:
-        logging.error("Unable to determine if target device is still mounted: %s" % e.message)
+    mounted = None
+    # if myConfig.dev there's no way we could have mounted dev ourselves
+    if myConfig.dev:
+        try:
+            mounted = check_dev_mounted(myConfig.dev)
+        except Exception as e:
+            logging.error("Unable to determine if target device is still mounted: %s" % e.message)
 
     if mounted:
             logging.debug("%s is mounted, umounting it" % str(myConfig.dev).rstrip())
