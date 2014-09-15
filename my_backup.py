@@ -180,13 +180,14 @@ def exit_success(myConfig):
 
 def check_srcs_present(srcpaths):
         logging.debug("checking for source paths: %s", str(srcpaths))
-	for path in srcpaths:
-                #TODO BUG?: ~/test ~/test2 both not existing, only ~/test is removed?
+        # keep original list as is for comparing completeness
+        srcpaths2 = list(srcpaths)
+        # iterate over copy of list only, removing from actual list doesn't work
+	for path in list(srcpaths2):
 		if not os.path.exists(path):
 			logging.debug("%s does not exist, removing it from the list of sources" % path)
-			srcpaths.remove(path)
-			continue;
-	return srcpaths
+			srcpaths2.remove(path)
+	return srcpaths2
 
 def get_dev_for_uuid(uuid):
 	uuids = []
@@ -502,10 +503,12 @@ def main(argv=None): # IGNORE:C0111
 
         #------------------------ END OF config parsing ----------------------------#
 
-        # TODO: BUG
-	srcspaths = check_srcs_present(srcpaths)
-	for path in srcpaths:
-		logging.debug("source path(s):" + str(path))
+	present_srcpaths = check_srcs_present(srcpaths)
+        #Initially I thought, if not all srcpaths can be found just
+        #run with the ones to be found, but with destructive backups
+        # the absence of a path may mean we delete the backup too!
+        if set(present_srcpaths) != set(srcpaths):
+            exit_early("Not all srcspaths can be found.", myConfig, MY_WARN)
 
         try:
             dev = get_dev_for_uuid(dst_uuid)
