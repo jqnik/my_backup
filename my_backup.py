@@ -21,7 +21,7 @@ from argparse import RawDescriptionHelpFormatter
 
 RSYNC_OPTIONS_DEFAULT = "--stats --del -rt"
 RSYNC_LOGDIR_DEFAULT = "/var/log/my_backup.log"
-DEFAULT_CFG_FILE = "~/.my_backup.cfg"
+DEFAULT_CFG_FILE = ".my_backup.cfg"
 
 CHECK_DEV_MOUNTED = "./check_dev_mounted.sh"
 UMOUNT_DEV = "./umount_dev.sh"
@@ -318,9 +318,15 @@ def main(argv=None): # IGNORE:C0111
 
 
         if not cfg_file:
-            cfg_file = DEFAULT_CFG_FILE
+            cfg_file = os.path.join(os.path.abspath(os.curdir), DEFAULT_CFG_FILE)
+        print("cfg_file = %s" % cfg_file)
+        if not os.path.exists(cfg_file):
+            open(cfg_file, 'a+').close()
+
         config = ConfigParser.ConfigParser()
         config.read(cfg_file)
+        if not config.has_section('General'):
+            config.add_section('General')
 
         myConfig.config = config
         myConfig.cfg_file = cfg_file
@@ -331,7 +337,10 @@ def main(argv=None): # IGNORE:C0111
 
         #TODO: Add log_file to command line parms
         if not log_file and config:
-            log_file = config.get('General', 'log_file').split()
+            try:
+                log_file = config.get('General', 'log_file').split()
+            except:
+                pass
 
         LEVELS = {'debug': logging.DEBUG,
           'info': logging.INFO,
@@ -351,6 +360,7 @@ def main(argv=None): # IGNORE:C0111
         cons_handler.setLevel(logging.INFO)
         #logging.getLogger('').addHandler(cons_handler)
 
+        #TODO: not tested yet
         if log_file:
             file_handler = logging.FileHandler(log_file, mode='a')
             file_handler.setLevel(logging.DEBUG)
@@ -439,7 +449,8 @@ def main(argv=None): # IGNORE:C0111
 
 
 	if today < next_action:
-		exit_info("Backup is not due today, will be due on %s" % str(next_action))
+		exit_early("Backup is not due today, will be due on %s" % str(next_action),
+                        myConfig, MY_INFO)
 	else:
 		logging.info("Backup is due")
 
@@ -454,8 +465,9 @@ def main(argv=None): # IGNORE:C0111
         if srcpaths:
             logging.debug("Source paths = " + str(srcpaths))
         else:
-            exit_info("Source paths are not defined."
-                "Pass them on the command line on in the configuration file.")
+            exit_early("Source paths are not defined."
+                "Pass them on the command line on in the configuration file.",
+                    myConfig, MY_WARN)
 
         if not dst_mount and config:
             try:
@@ -464,8 +476,9 @@ def main(argv=None): # IGNORE:C0111
                 pass
         # see comment above on srcpaths
         if not dst_mount:
-            exit_info("Destination mount point not defined."
-                "Pass it on the command line or in the configuration file.")
+            exit_early("Destination mount point not defined."
+                    "Pass it on the command line or in the configuration file.",
+                    myConfig, MY_WARN)
 
         if not dst_uuid and config:
             try:
@@ -474,8 +487,9 @@ def main(argv=None): # IGNORE:C0111
                 pass
         # see comment above on srcpaths
         if not dst_uuid:
-            exit_info("Destination UUID not defined"
-                "Pass it on the command line on in the configuration file.")
+            exit_early("Destination UUID not defined"
+                "Pass it on the command line on in the configuration file.",
+                myConfig, MY_WARN)
 
         # Destination path is completely optional
         if not dst_path and config:
