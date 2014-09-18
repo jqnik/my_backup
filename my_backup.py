@@ -417,7 +417,8 @@ def main(argv=None): # IGNORE:C0111
 
         if not myConfig.backup_interval_days and config:
             try:
-                myConfig.backup_interval_days = int(config.get('General', 'backup_interval_days'))
+                myConfig.backup_interval_days = int(config.get('General',
+                    'backup_interval_days'))
             except Exception:
                 myConfig.backup_interval_days = BACKUP_INTERVAL_DAYS_DEFAULT
 
@@ -429,13 +430,15 @@ def main(argv=None): # IGNORE:C0111
 
         if not myConfig.overdue_threshold_days and config:
             try:
-                myConfig.overdue_threshold_days = int(config.get('General', 'overdue_threshold_days'))
+                myConfig.overdue_threshold_days = int(config.get('General',
+                    'overdue_threshold_days'))
             except Exception:
                 myConfig.overdue_threshold_days = OVERDUE_THRESHOLD_DAYS_DEFAULT
 
         if not myConfig.retry_when_overdue_days and config:
             try:
-                myConfig.retry_when_overdue_days = int(config.get('General', 'retry_when_overdue_days'))
+                myConfig.retry_when_overdue_days = int(config.get('General',
+                    'retry_when_overdue_days'))
             except Exception:
                 myConfig.retry_when_overdue_days = RETRY_WHEN_OVERDUE_DAYS_DEFAULT
 
