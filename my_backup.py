@@ -19,7 +19,7 @@ import subprocess
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-RSYNC_OPTIONS_DEFAULT = "--stats --del -rt"
+RSYNC_OPTIONS_DEFAULT = "--stats --dry-run --del --relative -a"
 RSYNC_LOGDIR_DEFAULT = "/var/log/my_backup.log"
 DEFAULT_CFG_FILE = ".my_backup.cfg"
 
@@ -566,11 +566,9 @@ def main(argv=None): # IGNORE:C0111
 	# src paths all exist, device mounted, target path exists
         logging.info("running rsync command now...")
         sources_string = " ".join(present_srcpaths)
-        hardcoded_options_string = "--stats --dry-run --del -rt"
-        #hardcoded_options_string = "--dry-run --del -rt --stats --log-file $LOGFILE"
-        all_options_string = " ".join([hardcoded_options_string, sources_string, dst])
+        all_options_string = " ".join([rsync_options, sources_string, dst])
         out = None
-        logging.debug("calling rsync with: %s" % all_options_string)
+        logging.debug("calling rsync as: rsync %s" % all_options_string)
         try:
             proc = subprocess.Popen([RUN_RSYNC, all_options_string],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
