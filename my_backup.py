@@ -319,7 +319,6 @@ def main(argv=None): # IGNORE:C0111
 
         if not cfg_file:
             cfg_file = os.path.join(os.path.abspath(os.curdir), DEFAULT_CFG_FILE)
-        print("cfg_file = %s" % cfg_file)
         if not os.path.exists(cfg_file):
             open(cfg_file, 'a+').close()
 
