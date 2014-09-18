@@ -448,10 +448,12 @@ def main(argv=None): # IGNORE:C0111
 
 
 	if today < next_action:
-		exit_early("Backup is not due today, will be due on %s" % str(next_action),
-                        myConfig, MY_INFO)
+            # We are not calling exit_early here, since it updates next_action in cfg_file
+            logging.info("Backup is not due today, will be due on %s" % str(next_action))
+            cleanup(myConfig)
+            sys.exit(0)
 	else:
-		logging.info("Backup is due")
+            logging.info("Backup is due")
 
         if not srcpaths and config:
             try:
