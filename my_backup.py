@@ -559,18 +559,20 @@ def main(argv=None): # IGNORE:C0111
 
 	# we made it here:
 	# src paths all exist, device mounted, target path exists
-        logging.info("runing rsync command now...")
+        logging.info("running rsync command now...")
         sources_string = " ".join(present_srcpaths)
         hardcoded_options_string = "--stats --dry-run --del -rt"
         #hardcoded_options_string = "--dry-run --del -rt --stats --log-file $LOGFILE"
         all_options_string = " ".join([hardcoded_options_string, sources_string, dst])
         out = None
+        logging.debug("calling rsync with: %s" % all_options_string)
         try:
             proc = subprocess.Popen([RUN_RSYNC, all_options_string],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = proc.communicate()
         except Exception as e:
-            exit_early("Unexpected error during rsync command: (%s)" % (e.message), myConfig, MY_ERROR)
+            exit_early("Unexpected error during rsync command: (%s)" % (e.message),
+                    myConfig, MY_ERROR)
 
 	if proc.returncode > 0:
             exit_early("rsync command failed: %s return code: %s. STDOUT: \"%s\" STDERR: \"%s\"" %
