@@ -11,5 +11,9 @@ Roadmap:
     * guides the user through finding the correct disk device and updates config accordingly
     * guides the user through entering and testing email account for notification
 
+TODO:
+* load script logging dir for logfile location from commandline or cfg file
+* load rsync logging options from commandline or cfg file
+
 Enhancements:
 * Better email notifications (i.e. give friendly notice ahead of backup due-date)
