@@ -19,7 +19,7 @@ import subprocess
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-RSYNC_OPTIONS_DEFAULT = "--stats --dry-run --del --relative -a"
+RSYNC_OPTIONS_DEFAULT = "--stats --del --relative -a"
 RSYNC_LOGDIR_DEFAULT = "/var/log/my_backup.log"
 DEFAULT_CFG_FILE = ".my_backup.cfg"
 
