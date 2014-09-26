@@ -23,10 +23,10 @@ RSYNC_OPTIONS_DEFAULT = "--stats --dry-run --del --relative -a"
 RSYNC_LOGDIR_DEFAULT = "/var/log/my_backup.log"
 DEFAULT_CFG_FILE = ".my_backup.cfg"
 
-CHECK_DEV_MOUNTED = "./check_dev_mounted.sh"
-UMOUNT_DEV = "./umount_dev.sh"
-MOUNT_DEV = "./mount_dev.sh"
-RUN_RSYNC = "./run_rsync.sh"
+CHECK_DEV_MOUNTED = "check_dev_mounted.sh"
+UMOUNT_DEV = "umount_dev.sh"
+MOUNT_DEV = "mount_dev.sh"
+RUN_RSYNC = "run_rsync.sh"
 
 OVERDUE_THRESHOLD_DAYS_DEFAULT = 7
 RETRY_DAYS_DEFAULT = 2
@@ -69,6 +69,9 @@ class MyConfig:
     email_subject = None
     email_user = None
     email_pass = None
+
+def runDir():
+    return os.path.dirname(os.path.realpath(sys.argv[0]))+"/"
 
 def cleanup(myConfig):
 
@@ -219,7 +222,7 @@ def get_dev_for_uuid(uuid):
 #returns True if uuid is mounted, False otherwise
 def check_dev_mounted(dev):
         try:
-            proc = subprocess.Popen([CHECK_DEV_MOUNTED, dev],
+            proc = subprocess.Popen([runDir()+CHECK_DEV_MOUNTED, dev],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = proc.communicate()
         except:
@@ -232,7 +235,7 @@ def check_dev_mounted(dev):
 
 def umount_dev(dev):
         try:
-            proc = subprocess.Popen([UMOUNT_DEV, dev],
+            proc = subprocess.Popen([runDir()+UMOUNT_DEV, dev],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = proc.communicate()
         except:
@@ -245,7 +248,7 @@ def umount_dev(dev):
 
 def mount_dev(dev, trgt):
         try:
-            proc = subprocess.Popen([MOUNT_DEV, dev, trgt],
+            proc = subprocess.Popen([runDir()+MOUNT_DEV, dev, trgt],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = proc.communicate()
         except:
@@ -570,7 +573,7 @@ def main(argv=None): # IGNORE:C0111
         out = None
         logging.debug("calling rsync as: rsync %s" % all_options_string)
         try:
-            proc = subprocess.Popen([RUN_RSYNC, all_options_string],
+            proc = subprocess.Popen([runDir()+RUN_RSYNC, all_options_string],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = proc.communicate()
         except Exception as e:
