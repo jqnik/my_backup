@@ -358,10 +358,6 @@ def main(argv=None): # IGNORE:C0111
                             format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                             datefmt='%m-%d %H:%M')
 
-        cons_handler = logging.StreamHandler()
-        cons_handler.setLevel(logging.INFO)
-        #logging.getLogger('').addHandler(cons_handler)
-
         #TODO: not tested yet
         if log_file:
             file_handler = logging.FileHandler(log_file, mode='a')
@@ -369,7 +365,9 @@ def main(argv=None): # IGNORE:C0111
             logging.getLogger('').addHandler(file_handler)
 
         syslog_handler = logging.handlers.SysLogHandler(address='/dev/log')
+        syslog_formatter = logging.Formatter('%(filename)s[%(process)s]: [%(levelname)s] %(message)s')
         syslog_handler.setLevel(logging.WARNING)
+        syslog_handler.setFormatter(syslog_formatter)
         logging.getLogger('').addHandler(syslog_handler)
 
 
@@ -578,7 +576,7 @@ def main(argv=None): # IGNORE:C0111
             out, err = proc.communicate()
         except Exception as e:
             exit_early("Unexpected error during rsync command: (%s)" % (e.message),
-                    myConfig, MY_ERROR)
+                myConfig, MY_ERROR)
 
 	if proc.returncode > 0:
             exit_early("rsync command failed: %s return code: %s. STDOUT: \"%s\" STDERR: \"%s\"" %
