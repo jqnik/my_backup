@@ -580,7 +580,7 @@ def main(argv=None): # IGNORE:C0111
 
 	if proc.returncode > 0:
             exit_early("rsync command failed: %s return code: %s. STDOUT: \"%s\" STDERR: \"%s\"" %
-                    (str(UMOUNT_DEV), str(proc.returncode), str(out), str(err).rstrip()),
+                    (str(RUN_RSYNC), str(proc.returncode), str(out), str(err).rstrip()),
                     myConfig, MY_ERROR)
 	else:
             exit_success(out, myConfig)
